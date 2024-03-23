@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.js"></script>
+<body>
+
+    <div id="app">
+
+        <div class="p-3">
+
+            <label for="number" >Input the number of sets you want!<input type="number" min="3" id="number" v-model="number" ></label>
+            <button class="btn btn-primary" @click="generateTiles">Start</button>
+
+        </div>
+        
+        <div v-if="display" class="d-flex justify-content-center mt-2">
+
+            
+
+            <tiles :tiles="tiles" @tile-pressed="receiveTile" @game-restart='restart'></tiles> <!-- any listeners must alw go back to here-->
+           
+
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+
+        <div id='display' class=" border m-3" style='height:50px;'>
+            <div v-if='notmatched'> 
+                
+                <span v-for="tile in final_tiles">
+                    <button class="btn btn-light"><img :src="'tile_img/' + tile + '.png' " alt="" :image="tile" width="20" height="20"></button>
+                </span>
+                
+            </div>
+        </div>
+
+        
+        
+    </div>
+    
+
+    
+</body>
+<script>
+
+        // <div id='app'></div>
+    const app = Vue.createApp({ 
+        data() { 
+            return { 
+                // key: value
+                tiles: [],
+                display: false,
+                restriction: 3,
+                pressedTiles: {},
+                final_tiles: [],
+                notmatched: true,
+                number: 0
+            };
+        }, // data
+        // computed: { 
+        //     derivedProperty() {
+        //         return false;
+        //     }  
+        // }, // computed
+        // created() { 
+        // },
+        // mounted() { 
+        // },
+        methods: {
+            generateTiles() {
+
+                
+                var sets = this.number
+
+                if (this.number % 3 != 0) {
+
+                    alert("Don't play me leh...")
+                    return
+
+                }
+                
+
+                var possible_cards = ['football', 'tennis', 'star']
+
+                for(var i = 0; i < sets; i++) {
+
+                    possible_cards.forEach(card => {
+                        this.tiles.push(card)
+                    })
+
+
+                }
+
+                this.display = true
+
+                
+            },
+
+            receiveTile (tile) {
+
+                
+                if (this.pressedTiles.hasOwnProperty(tile)) {
+
+                    this.pressedTiles[tile] += 1
+                    this.final_tiles.push(tile)
+                   
+                }
+
+                else {
+
+                    this.pressedTiles[tile] = 1
+                    this.final_tiles.push(tile)
+                 
+                }
+
+                if (this.pressedTiles[tile] == 3) {
+
+                    this.notmatched = false
+                    delete this.pressedTiles[tile]
+
+                    var remaining_tiles = Object.keys(this.pressedTiles)
+                    remaining_tiles.forEach(tile_accident => {
+
+                        var tile_count = this.pressedTiles[tile_accident]
+
+                        for(var i = 0; i < tile_count; i++) {
+
+                            this.tiles.push(tile_accident)
+
+                        }
+                        
+
+
+                    })
+
+                    console.log(remaining_tiles)
+                    this.final_tiles = []
+                    this.pressedTiles = {}
+                 
+
+                }
+                this.notmatched = true
+              
+
+            },
+
+            restart () {
+
+                this.tiles = []
+                this.pressedTiles = {}
+                this.final_tiles = []
+                this.display = false
+                this.notmatched = true
+                this.number = 0
+
+            }
+
+
+        } // methods
+
+    });
+
+</script>
+<script src="tiles.js"></script>
+<script>
+    const vm = app.mount('#app')
+</script>
+
+</html>
